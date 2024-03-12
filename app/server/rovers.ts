@@ -1,7 +1,5 @@
 import { TPhoto } from "../types/global";
 
-const NUMBER_DATA = 25;
-
 export async function getAllRovers(): Promise<TPhoto[]> {
   try {
     const data = await fetch(
