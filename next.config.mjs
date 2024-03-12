@@ -11,6 +11,10 @@ const nextConfig = {
       },
     ],
   },
+  env: {
+    API_URL: process.env.API_ENDPOINT,
+    API_KEY: process.env.API_KEY,
+  },
 };
 
 export default nextConfig;
