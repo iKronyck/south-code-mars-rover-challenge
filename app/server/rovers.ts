@@ -2,7 +2,7 @@ import { TPhoto } from "../types/global";
 
 const NUMBER_DATA = 25;
 
-export async function getAllRovers() {
+export async function getAllRovers(): Promise<TPhoto[]> {
   try {
     const data = await fetch(
       "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?&page=1&api_key=4AEnZ1PAQ5VLJbhpKSlW7pnmQpt09jPxFnWSornU"
