@@ -1,18 +1,13 @@
-import Image from "next/image";
+import RoverList from "@/components/RoverList/RoverListcomponents";
+import Skeleton from "@/components/Skeletoncomponents";
+import { Suspense } from "react";
 
-export default function Home() {
+export default async function Home() {
   return (
-    <main className="flex w-screen h-screen relative">
-      <Image
-        className="absolute w-full h-full"
-        alt="background image of mars"
-        src="/img/mars-walppaper.jpeg"
-        fill
-        priority
-      />
-      <div className="flex bg-blue-400 w-full h-full">
-        <h1 className="text-white z-10">Hello</h1>
-      </div>
-    </main>
+    <section className="mx-5 md:mx-10">
+      <Suspense fallback={<Skeleton />}>
+        <RoverList />
+      </Suspense>
+    </section>
   );
 }
