@@ -17,38 +17,13 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+    background-color: #000;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
-}
-
-.gallery-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
-}
-
-.gallery-item img {
-  width: 100%;
-  height: auto;
-}
-
-body {
-  background-image: url('../public//img/mars-walppaper.jpeg');
-  background-size: cover; /* Para cubrir todo el área del contenedor */
-  background-position: center; /* Para centrar la imagen */
-  background-repeat: no-repeat; /* Para evitar que la imagen se repita */
-  background-attachment: fixed; 
 }
 
 /*!
