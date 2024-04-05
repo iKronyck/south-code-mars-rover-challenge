@@ -1,13 +1,18 @@
 import RoverList from "@/components/RoverList/RoverListcomponents";
-import Skeleton from "@/components/Skeletoncomponents";
-import { Suspense } from "react";
 
-export default async function Home() {
+export default function Home() {
   return (
-    <section className="mx-5 md:mx-10">
-      <Suspense fallback={<Skeleton />}>
-        <RoverList />
-      </Suspense>
+    <section className="grid mx-5 md:mx-10">
+      <RoverList />
+      {/* <button
+        className="bg-white font-bold py-2 px-3 rounded-full fixed bottom-4 right-4"
+        type="button"
+        data-drawer-target="drawer-navigation"
+        data-drawer-show="drawer-navigation"
+        aria-controls="drawer-navigation"
+      >
+        <i className="fa-duotone fa-magnifying-glass text-orange text-xl" />
+      </button> */}
     </section>
   );
 }

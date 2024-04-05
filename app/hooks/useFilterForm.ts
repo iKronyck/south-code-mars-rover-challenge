@@ -1,3 +1,4 @@
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 enum ERover {
@@ -28,6 +29,9 @@ export default function useFilterForm() {
   const [sol, setSol] = useState("");
   const [filterTypeVal, setFilterTypeVal] = useState("");
   const [isSaving, setSaving] = useState(false);
+  const { replace, refresh, push, prefetch } = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [cameras, setCameras] = useState<string[]>([]);
 
@@ -48,6 +52,13 @@ export default function useFilterForm() {
     setSaving((value) => !value);
   };
 
+  const filterData = () => {
+    const params = new URLSearchParams(searchParams);
+    if (camera) params.set("camera", camera);
+    if (filter) params.set(filter, filterTypeVal);
+    replace(`${pathname}?${params.toString()}`);
+  };
+
   return {
     rover,
     rovers,
@@ -64,5 +75,6 @@ export default function useFilterForm() {
     onChangeSol,
     onChangeFilterTypeVal,
     onHandleAddBookmark,
+    filterData,
   };
 }

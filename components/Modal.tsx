@@ -6,6 +6,7 @@ import Input from "./Input";
 
 type TModal = {
   visible: boolean;
+  onClose: () => void;
 };
 
 export default function Modal({ visible }: TModal) {
