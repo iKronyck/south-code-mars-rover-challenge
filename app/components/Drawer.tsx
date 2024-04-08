@@ -25,6 +25,7 @@ import {
   ROVERS_LIST,
   SPIRIT_CAMERAS,
 } from "../utils/const";
+import { TBookmark } from "../types/global";
 
 interface DrawerProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
   const [filterTypeVal, setFilterTypeVal] = useState("");
   const [bookmarkName, setBookmarkName] = useState("");
   const { bookmarks, addBookmark } = useBookmarkStore();
+  const [option, setOption] = useState("");
 
   const { replace } = useRouter();
   const pathname = usePathname();
@@ -55,26 +57,41 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
   };
 
   const filterData = () => {
-    const params = new URLSearchParams(searchParams);
-    if (camera) params.set("camera", camera);
-    if (filter) params.set(filter, filterTypeVal);
-    onClose();
-    if (saveBookmark) {
-      addBookmark({
-        name: bookmarkName,
-        camera,
-        sol: filter === "sol" ? filterTypeVal : "",
-        earth_date: filter === "earth_date" ? filterTypeVal : "",
-      });
+    if (option !== "") {
+      filterByBookmark();
+    } else {
+      const params = new URLSearchParams(searchParams);
+      if (camera) params.set("camera", camera);
+      if (filter) params.set(filter, filterTypeVal);
+      onClose();
+      if (saveBookmark) {
+        addBookmark({
+          name: bookmarkName,
+          camera,
+          sol: filter === "sol" ? filterTypeVal : "",
+          earth_date: filter === "earth_date" ? filterTypeVal : "",
+        });
+      }
+      replace(`${pathname}?${params.toString()}`);
+      setRover("");
+      setCamera("");
+      setCameras([]);
+      setFilter("");
+      setSaveBookmark(false);
+      setFilterTypeVal("");
+      setBookmarkName("");
     }
+  };
+
+  const filterByBookmark = () => {
+    const data: TBookmark = JSON.parse(JSON.parse(option));
+    const params = new URLSearchParams(searchParams);
+    params.set("camera", data.camera);
+    const value = data.sol !== "" ? data.sol : data.earth_date;
+    params.set(data.sol !== "" ? "sol" : "earth_date", value as string);
+    onClose();
     replace(`${pathname}?${params.toString()}`);
-    setRover("");
-    setCamera("");
-    setCameras([]);
-    setFilter("");
-    setSaveBookmark(false);
-    setFilterTypeVal("");
-    setBookmarkName("");
+    setOption("");
   };
 
   return (
@@ -95,93 +112,104 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
             >
               <FormControl>
                 <FormLabel>Bookmarks</FormLabel>
-                <Select variant="filled" placeholder="Select bookmark">
+                <Select
+                  variant="filled"
+                  placeholder="Select bookmark"
+                  value={option !== "" ? JSON.parse(option).name : ""}
+                  onChange={(event) => {
+                    setOption(JSON.stringify(event.target.value));
+                  }}
+                >
                   {bookmarks.map((key, index) => (
-                    <option key={key.name}>{key.name}</option>
+                    <option key={key.name} value={JSON.stringify(key)}>
+                      {key.name}
+                    </option>
                   ))}
                 </Select>
               </FormControl>
             </Box>
-            <Box
-              border="1px dashed rgba(145, 158, 171, 0.5)"
-              borderRadius={5}
-              p={4}
-              sx={{ display: "flex", flexDirection: "column", gap: 4 }}
-            >
-              <FormControl isRequired>
-                <FormLabel>Rover</FormLabel>
-                <Select
-                  name="rover"
-                  value={rover}
-                  onChange={(event) => onChangeRover(event.target.value)}
-                  placeholder="Select rover"
-                >
-                  {ROVERS_LIST.map((key, index) => (
-                    <option key={index}>{key}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel>Camera</FormLabel>
-                <Select
-                  name="camera"
-                  value={camera}
-                  onChange={(event) => setCamera(event.target.value)}
-                  placeholder="Select camera"
-                >
-                  {cameras.map((key, index) => (
-                    <option key={index}>{key}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel>Filter type</FormLabel>
-                <Select
-                  name="filter_type"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  variant="outline"
-                  placeholder="Select a filter type"
-                >
-                  {FILTERS_LIST.map((key, index) => (
-                    <option key={index}>{key}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              {filter ? (
+            {option === "" ? (
+              <Box
+                border="1px dashed rgba(145, 158, 171, 0.5)"
+                borderRadius={5}
+                p={4}
+                sx={{ display: "flex", flexDirection: "column", gap: 4 }}
+              >
                 <FormControl isRequired>
-                  <FormLabel>
-                    {filter === "earth_date" ? "Earth date" : "Sol date"}
-                  </FormLabel>
-                  <Input
-                    type={filter === "earth_date" ? "date" : "number"}
-                    name="filter_value"
-                    value={filterTypeVal}
-                    onChange={(event) => setFilterTypeVal(event.target.value)}
-                  />
+                  <FormLabel>Rover</FormLabel>
+                  <Select
+                    name="rover"
+                    value={rover}
+                    onChange={(event) => onChangeRover(event.target.value)}
+                    placeholder="Select rover"
+                  >
+                    {ROVERS_LIST.map((key, index) => (
+                      <option key={index}>{key}</option>
+                    ))}
+                  </Select>
                 </FormControl>
-              ) : null}
-              <FormControl>
-                <Checkbox
-                  isChecked={saveBookmark}
-                  colorScheme="orange"
-                  onChange={(e) => setSaveBookmark(e.target.checked)}
-                >
-                  Save to Bookmarks
-                </Checkbox>
-              </FormControl>
-              {saveBookmark ? (
                 <FormControl isRequired>
-                  <FormLabel>Bookmark name</FormLabel>
-                  <Input
-                    type="text"
-                    name="bookmark"
-                    value={bookmarkName}
-                    onChange={(event) => setBookmarkName(event.target.value)}
-                  />
+                  <FormLabel>Camera</FormLabel>
+                  <Select
+                    name="camera"
+                    value={camera}
+                    onChange={(event) => setCamera(event.target.value)}
+                    placeholder="Select camera"
+                  >
+                    {cameras.map((key, index) => (
+                      <option key={index}>{key}</option>
+                    ))}
+                  </Select>
                 </FormControl>
-              ) : null}
-            </Box>
+                <FormControl isRequired>
+                  <FormLabel>Filter type</FormLabel>
+                  <Select
+                    name="filter_type"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    variant="outline"
+                    placeholder="Select a filter type"
+                  >
+                    {FILTERS_LIST.map((key, index) => (
+                      <option key={index}>{key}</option>
+                    ))}
+                  </Select>
+                </FormControl>
+                {filter ? (
+                  <FormControl isRequired>
+                    <FormLabel>
+                      {filter === "earth_date" ? "Earth date" : "Sol date"}
+                    </FormLabel>
+                    <Input
+                      type={filter === "earth_date" ? "date" : "number"}
+                      name="filter_value"
+                      value={filterTypeVal}
+                      onChange={(event) => setFilterTypeVal(event.target.value)}
+                    />
+                  </FormControl>
+                ) : null}
+                <FormControl>
+                  <Checkbox
+                    isChecked={saveBookmark}
+                    colorScheme="orange"
+                    onChange={(e) => setSaveBookmark(e.target.checked)}
+                  >
+                    Save to Bookmarks
+                  </Checkbox>
+                </FormControl>
+                {saveBookmark ? (
+                  <FormControl isRequired>
+                    <FormLabel>Bookmark name</FormLabel>
+                    <Input
+                      type="text"
+                      name="bookmark"
+                      value={bookmarkName}
+                      onChange={(event) => setBookmarkName(event.target.value)}
+                    />
+                  </FormControl>
+                ) : null}
+              </Box>
+            ) : null}
           </form>
         </DrawerBody>
 
