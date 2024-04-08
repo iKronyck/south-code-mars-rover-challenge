@@ -1,13 +1,16 @@
 import { TPhoto } from "../types/global";
 
-export async function getAllRovers(): Promise<TPhoto[]> {
+export async function getAllRovers(
+  page: number,
+  query: string = "latest_photos?"
+): Promise<TPhoto[]> {
   try {
     const data = await fetch(
-      "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?&page=1&api_key=4AEnZ1PAQ5VLJbhpKSlW7pnmQpt09jPxFnWSornU"
+      `${process.env.API_URL}${query}&page=${page}&api_key=${process.env.API_KEY}`
     );
     const rovers = await data.json();
-    return rovers.latest_photos ?? [];
+    return rovers.latest_photos ?? rovers.photos ?? [];
   } catch (error) {
-    throw Error("Error getting the data.");
+    throw Error("Error getting the data." + error);
   }
 }
