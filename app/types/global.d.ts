@@ -21,3 +21,15 @@ export type TPhoto = {
   camera: TCamera;
   rover: TRover;
 };
+
+export type TBookmark = {
+  name: string;
+  camera: string;
+  sol?: string;
+  earth_date?: string;
+};
+
+export type BookMarkStore = {
+  bookmarks: TBookmark[];
+  addBookmark: (bookmark: TBookmark) => void;
+};

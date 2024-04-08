@@ -7,7 +7,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 export default function useRoversData() {
   const [rovers, setRovers] = useState<TPhoto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, serLoadingMore] = useState(false);
 
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -35,6 +34,12 @@ export default function useRoversData() {
 
   useEffect(() => {
     getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams]);
 
   return { rovers, loading };

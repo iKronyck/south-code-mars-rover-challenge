@@ -12,9 +12,19 @@ import {
   FormControl,
   FormLabel,
   Select,
+  Checkbox,
 } from "@chakra-ui/react";
-import { StarIcon } from "@chakra-ui/icons";
-import useFilterForm from "../hooks/useFilterForm";
+import useBookmarkStore from "../hooks/useBookmarks";
+import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  CURIOSITY_CAMERAS,
+  ERover,
+  FILTERS_LIST,
+  OPPORTUNITY_CAMERAS,
+  ROVERS_LIST,
+  SPIRIT_CAMERAS,
+} from "../utils/const";
 
 interface DrawerProps {
   isOpen: boolean;
@@ -22,20 +32,51 @@ interface DrawerProps {
 }
 
 export default function Drawer({ isOpen, onClose }: DrawerProps) {
-  const {
-    rover,
-    camera,
-    filter,
-    filters,
-    filterTypeVal,
-    onChangeCamera,
-    onChangeRover,
-    onChangeFilter,
-    onChangeFilterTypeVal,
-    cameras,
-    rovers,
-    filterData,
-  } = useFilterForm();
+  const [rover, setRover] = useState("");
+  const [camera, setCamera] = useState("");
+  const [cameras, setCameras] = useState<string[]>([]);
+  const [filter, setFilter] = useState("");
+  const [saveBookmark, setSaveBookmark] = useState(false);
+  const [filterTypeVal, setFilterTypeVal] = useState("");
+  const [bookmarkName, setBookmarkName] = useState("");
+  const { bookmarks, addBookmark } = useBookmarkStore();
+
+  const { replace } = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const onChangeRover = (value: string) => {
+    setRover(value);
+
+    if (value === ERover.CURIOSITY) setCameras(CURIOSITY_CAMERAS);
+    else if (value === ERover.OPPORTUNITY) setCameras(OPPORTUNITY_CAMERAS);
+    else if (value === ERover.SPIRIT) setCameras(SPIRIT_CAMERAS);
+    else setCameras([]);
+  };
+
+  const filterData = () => {
+    const params = new URLSearchParams(searchParams);
+    if (camera) params.set("camera", camera);
+    if (filter) params.set(filter, filterTypeVal);
+    onClose();
+    if (saveBookmark) {
+      addBookmark({
+        name: bookmarkName,
+        camera,
+        sol: filter === "sol" ? filterTypeVal : "",
+        earth_date: filter === "earth_date" ? filterTypeVal : "",
+      });
+    }
+    replace(`${pathname}?${params.toString()}`);
+    setRover("");
+    setCamera("");
+    setCameras([]);
+    setFilter("");
+    setSaveBookmark(false);
+    setFilterTypeVal("");
+    setBookmarkName("");
+  };
+
   return (
     <ChakraDrawer isOpen={isOpen} placement="right" onClose={onClose}>
       <DrawerOverlay />
@@ -55,10 +96,11 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
               <FormControl>
                 <FormLabel>Bookmarks</FormLabel>
                 <Select variant="filled" placeholder="Select bookmark">
-                  {/* {getStorage().get().map((key: Query, index: number) => (<option key={index} value={key.id}>{key.name}</option>))} */}
+                  {bookmarks.map((key, index) => (
+                    <option key={key.name}>{key.name}</option>
+                  ))}
                 </Select>
               </FormControl>
-              {/* <IconButton isDisabled={(query?.name === undefined || query?.name === "")} onClick={() => { getStorage().delete(query.id); toast({ title: "Bookmark successfully deleted", status: "info", isClosable: true }); handleComplete(undefined); setDrawerOpen(false) }} ml={2} alignSelf="flex-end" aria-label='delete' colorScheme="red" icon={<DeleteIcon />} /> */}
             </Box>
             <Box
               border="1px dashed rgba(145, 158, 171, 0.5)"
@@ -74,7 +116,7 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
                   onChange={(event) => onChangeRover(event.target.value)}
                   placeholder="Select rover"
                 >
-                  {rovers.map((key, index) => (
+                  {ROVERS_LIST.map((key, index) => (
                     <option key={index}>{key}</option>
                   ))}
                 </Select>
@@ -84,7 +126,7 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
                 <Select
                   name="camera"
                   value={camera}
-                  onChange={(event) => onChangeCamera(event.target.value)}
+                  onChange={(event) => setCamera(event.target.value)}
                   placeholder="Select camera"
                 >
                   {cameras.map((key, index) => (
@@ -97,11 +139,11 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
                 <Select
                   name="filter_type"
                   value={filter}
-                  onChange={(e) => onChangeFilter(e.target.value)}
+                  onChange={(e) => setFilter(e.target.value)}
                   variant="outline"
                   placeholder="Select a filter type"
                 >
-                  {filters.map((key, index) => (
+                  {FILTERS_LIST.map((key, index) => (
                     <option key={index}>{key}</option>
                   ))}
                 </Select>
@@ -115,9 +157,27 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
                     type={filter === "earth_date" ? "date" : "number"}
                     name="filter_value"
                     value={filterTypeVal}
-                    onChange={(event) =>
-                      onChangeFilterTypeVal(event.target.value)
-                    }
+                    onChange={(event) => setFilterTypeVal(event.target.value)}
+                  />
+                </FormControl>
+              ) : null}
+              <FormControl>
+                <Checkbox
+                  isChecked={saveBookmark}
+                  colorScheme="orange"
+                  onChange={(e) => setSaveBookmark(e.target.checked)}
+                >
+                  Save to Bookmarks
+                </Checkbox>
+              </FormControl>
+              {saveBookmark ? (
+                <FormControl isRequired>
+                  <FormLabel>Bookmark name</FormLabel>
+                  <Input
+                    type="text"
+                    name="bookmark"
+                    value={bookmarkName}
+                    onChange={(event) => setBookmarkName(event.target.value)}
                   />
                 </FormControl>
               ) : null}
@@ -126,20 +186,15 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
         </DrawerBody>
 
         <DrawerFooter>
-          <Button bg="#fff" color="#eb601d" border="1px solid #eb601d">
-            Save to Bookmarks
-          </Button>
           <Button
+            flex={1}
             bg="#eb601d"
             color="white"
             borderRadius={5}
             ml={3}
-            onClick={() => {
-              onClose();
-              filterData();
-            }}
+            onClick={filterData}
           >
-            Filter
+            {saveBookmark ? "Save and Filter" : "Filter"}
           </Button>
         </DrawerFooter>
       </DrawerContent>
