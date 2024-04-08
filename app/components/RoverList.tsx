@@ -1,8 +1,8 @@
 "use client";
 
-import RoverItem from "../RoverItem";
+import RoverItem from "./RoverItem";
 import useRoversData from "@/app/hooks/useRoversDatacomponents";
-import Skeleton from "../Skeleton";
+import Skeleton from "./Skeleton";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Spinner } from "@chakra-ui/react";

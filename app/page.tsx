@@ -1,4 +1,4 @@
-import RoverList from "@/components/RoverList/RoverListcomponents";
+import RoverList from "./components/RoverList";
 
 export default function Home() {
   return (
